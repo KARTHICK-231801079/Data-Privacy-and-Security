@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}OTP Verification - Healthcare Security{% endblock %}
+{% block content %}
+<style>
+    .otp-wrap { max-width: 420px; margin: 3.5rem auto; animation: fadeUp 0.5s ease; }
+    .otp-hero { text-align: center; margin-bottom: 2rem; }
+    .otp-icon-box {
+        width: 64px; height: 64px; background: var(--primary);
+        display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1.2rem;
+    }
+    .otp-icon-box i { color: white; font-size: 1.7rem; }
+    .otp-hero h1 { font-size: 1.9rem; font-weight: 700; letter-spacing: -0.5px; }
+    .otp-hero p { color: var(--text-muted); font-size: 0.92rem; margin-top: 0.3rem; }
+    .user-pill {
+        border: 1.5px solid var(--border);
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.5rem;
+        display: flex; align-items: center; gap: 0.75rem;
+        background: var(--bg);
+    }
+    .user-pill .label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .user-pill .uname { font-weight: 700; color: var(--text); font-size: 1rem; }
+    .info-bar { background: var(--accent-light); border-left: 4px solid var(--accent); padding: 0.75rem 1rem; margin-bottom: 1.4rem; font-size: 0.87rem; color: #00348a; font-weight: 500; }
+    .form-group { margin-bottom: 1.3rem; }
+    .otp-big { text-align: center; font-size: 2rem; letter-spacing: 0.6em; font-family: 'DM Mono', monospace; font-weight: 600; }
+    .timer-note { text-align: center; font-size: 0.83rem; color: var(--text-muted); margin-top: 0.6rem; font-weight: 500; }
+    .timer-note strong { color: var(--accent); }
+    .btn-full { width: 100%; padding: 0.8rem; font-size: 0.95rem; margin-top: 0.5rem; }
+    .security-note {
+        border: 1.5px solid var(--border); border-left: 4px solid var(--primary);
+        padding: 1rem 1.1rem; margin-top: 1.5rem; font-size: 0.84rem; color: var(--text-muted); line-height: 1.6;
+    }
+    .security-note strong { color: var(--text); }
+    .otp-foot { text-align: center; margin-top: 1.5rem; font-size: 0.88rem; }
+</style>
+
+<div class="otp-wrap">
+    <div class="otp-hero">
+        <div class="otp-icon-box"><i class="fas fa-mobile-alt"></i></div>
+        <h1>Verify Identity</h1>
+        <p>Multi-Factor Authentication &mdash; Step 2 of 2</p>
+    </div>
+
+    <div class="user-pill">
+        <i class="fas fa-user-check" style="color:var(--accent); font-size:1.3rem;"></i>
+        <div>
+            <div class="label">Authenticating as</div>
+            <div class="uname">{{ username }}</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="info-bar">
+                <i class="fas fa-info-circle"></i> &nbsp;Enter the <strong>6-digit code</strong> from your authenticator app
+            </div>
+            <form method="post" action="{{ url_for('otp') }}">
+                <div class="form-group">
+                    <label class="form-label" for="otp"><i class="fas fa-barcode"></i> &nbsp;One-Time Password</label>
+                    <input type="text" class="form-control otp-big" id="otp" name="otp" placeholder="000000" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" required autofocus>
+                    <div class="timer-note"><i class="fas fa-clock"></i> Code refreshes every <strong>30 seconds</strong></div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-lock-open"></i> &nbsp; Verify &amp; Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="security-note">
+        <i class="fas fa-shield-alt"></i> &nbsp;
+        <strong>Why MFA?</strong> Multi-factor authentication protects your account by requiring something you know (password) and something you have (authenticator). This prevents unauthorized access even if your password is compromised.
+    </div>
+
+    <div class="otp-foot">
+        <a href="{{ url_for('login') }}"><i class="fas fa-arrow-left"></i> Back to Login</a>
+    </div>
+</div>
+{% endblock %}

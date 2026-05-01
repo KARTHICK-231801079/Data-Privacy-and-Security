@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Access Denied - Healthcare Security{% endblock %}
+{% block content %}
+<style>
+    .err-wrap { max-width: 520px; margin: 4rem auto; animation: fadeUp 0.5s ease; }
+    .err-code-bar {
+        background: var(--primary); color: white; padding: 2rem;
+        text-align: center; margin-bottom: 1.5rem;
+        display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    }
+    .err-code-bar .code-num { font-size: 5rem; font-weight: 800; line-height: 1; color: var(--danger); font-family: 'DM Mono', monospace; }
+    .err-code-bar .code-lbl { font-size: 1.4rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+    .err-icon { font-size: 2.5rem; opacity: 0.5; margin-bottom: 0.5rem; }
+    .err-msg { background: var(--white); border: 1.5px solid var(--border); padding: 1.4rem 1.5rem; margin-bottom: 1.2rem; color: var(--text-muted); font-size: 0.93rem; line-height: 1.7; }
+    .sec-notice { background: #fff0f0; border: 1.5px solid var(--danger); border-left: 5px solid var(--danger); padding: 1.2rem 1.4rem; margin-bottom: 1.5rem; }
+    .sec-notice h4 { font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #7a0011; margin-bottom: 0.6rem; }
+    .sec-notice p { font-size: 0.87rem; color: #7a0011; margin: 0; line-height: 1.6; }
+    .btn-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .btn-row .btn { flex: 1; text-align: center; min-width: 140px; padding: 0.75rem; font-size: 0.9rem; }
+    .btn-outline { background: var(--white); color: var(--accent); border: 1.5px solid var(--accent); box-shadow: 3px 3px 0 var(--accent); font-weight: 700; font-size: 0.9rem; padding: 0.75rem 1.4rem; border-radius: 0; text-align: center; transition: all 0.2s; cursor: pointer; text-decoration: none; display: inline-block; }
+    .btn-outline:hover { background: var(--accent); color: white; box-shadow: none; transform: translate(2px,2px); }
+    .info-footer { background: var(--accent-light); border: 1.5px solid var(--accent); padding: 0.9rem 1.2rem; margin-top: 1.5rem; font-size: 0.85rem; color: #00348a; font-weight: 500; }
+    .info-footer strong { font-weight: 800; }
+</style>
+
+<div class="err-wrap">
+    <div class="err-code-bar">
+        <div class="err-icon"><i class="fas fa-lock"></i></div>
+        <div class="code-num">403</div>
+        <div class="code-lbl">Access Denied</div>
+    </div>
+
+    <div class="err-msg">
+        {{ message or 'You do not have permission to access this resource. This event has been logged for security audit purposes.' }}
+    </div>
+
+    <div class="sec-notice">
+        <h4><i class="fas fa-shield-alt"></i> &nbsp;Security Notice</h4>
+        <p>This unauthorized access attempt has been recorded in the security audit log with your username, IP address, and timestamp. All access violations are monitored and reported to the system administrator for investigation.</p>
+    </div>
+
+    <div class="btn-row">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> &nbsp; Return to Dashboard
+        </a>
+        <a href="{{ url_for('logout') }}" class="btn-outline">
+            <i class="fas fa-sign-out-alt"></i> &nbsp; Logout
+        </a>
+    </div>
+
+    <div class="info-footer">
+        <i class="fas fa-info-circle"></i> &nbsp;<strong>Why are you seeing this?</strong> Your role doesn't have permission to access this resource. Contact your administrator if you believe this is incorrect.
+    </div>
+</div>
+{% endblock %}

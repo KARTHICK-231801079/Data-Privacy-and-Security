@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block title %}Doctor Dashboard - Healthcare Security{% endblock %}
+{% block content %}
+<style>
+    .doc-hdr {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 2rem; border-bottom: 2px solid var(--primary); padding-bottom: 1rem;
+        animation: fadeUp 0.4s ease;
+    }
+    .doc-hdr h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; }
+    .doc-hdr p { color: var(--text-muted); font-size: 0.9rem; margin: 0.2rem 0 0; }
+    .doc-badge { background: var(--success); color: white; padding: 0.5rem 1.2rem; font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 1px; }
+    .welcome-bar {
+        background: var(--primary); color: white; padding: 1.6rem 2rem;
+        margin-bottom: 2rem; display: flex; align-items: center; gap: 1.5rem;
+        animation: slideIn 0.5s ease;
+    }
+    .welcome-bar .wic { font-size: 2.3rem; opacity: 0.65; }
+    .welcome-bar h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.2rem; letter-spacing: -0.3px; }
+    .welcome-bar p { opacity: 0.75; font-size: 0.88rem; margin: 0; }
+    .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-box2 {
+        background: var(--white); border: 1.5px solid var(--border); padding: 1.3rem; text-align: center;
+        box-shadow: 3px 3px 0 var(--border); transition: all 0.2s;
+        animation: fadeUp 0.5s ease both;
+    }
+    .stat-box2:nth-child(1){animation-delay:.05s}.stat-box2:nth-child(2){animation-delay:.1s}
+    .stat-box2:nth-child(3){animation-delay:.15s}.stat-box2:nth-child(4){animation-delay:.2s}
+    .stat-box2:hover { box-shadow: 4px 4px 0 var(--success); transform: translate(-1px,-1px); }
+    .stat-box2 .ic { font-size: 1.5rem; color: var(--success); margin-bottom: 0.5rem; }
+    .stat-box2 .num { font-size: 2rem; font-weight: 800; color: var(--success); line-height: 1; margin-bottom: 0.25rem; }
+    .stat-box2 .lbl { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); font-weight: 600; }
+    .sec-title { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text); border-left: 4px solid var(--success); padding-left: 0.75rem; margin: 2rem 0 1rem; }
+    .pat-card {
+        background: var(--white); border: 1.5px solid var(--border); padding: 1.4rem 1.5rem;
+        margin-bottom: 0.8rem; box-shadow: 3px 3px 0 var(--border);
+        transition: all 0.2s; animation: fadeUp 0.5s ease both; display: flex; gap: 1.5rem; align-items: center;
+    }
+    .pat-card:hover { box-shadow: 4px 4px 0 var(--success); transform: translate(-1px,-1px); }
+    .pat-name { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+    .pat-meta p { font-size: 0.86rem; color: var(--text-muted); margin: 0.2rem 0; }
+    .pat-meta strong { color: var(--text); }
+    .pat-status { padding: 0.45rem 0.9rem; font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    .st-stable   { background: #e8f7ee; color: #1a5c37; border: 1.5px solid #2a9d5c; }
+    .st-critical { background: #fff0f0; color: #7a0011; border: 1.5px solid var(--danger); }
+    .st-followup { background: #fff8e8; color: #7a4a00; border: 1.5px solid var(--warning); }
+    .hipaa-bar { background: var(--primary); color: white; padding: 1rem 1.5rem; font-size: 0.87rem; margin-top: 2rem; font-weight: 500; }
+    .hipaa-bar strong { color: #7dd3fc; }
+</style>
+
+<div class="doc-hdr">
+    <div>
+        <h1><i class="fas fa-stethoscope" style="color:var(--success);"></i> &nbsp;Doctor Portal</h1>
+        <p>Patient Management &amp; Medical Records</p>
+    </div>
+    <div class="doc-badge"><i class="fas fa-user-md"></i> &nbsp;{{ username }}</div>
+</div>
+
+<div class="welcome-bar">
+    <div class="wic"><i class="fas fa-hand-sparkles"></i></div>
+    <div>
+        <h2>Welcome, Dr. {{ username }}!</h2>
+        <p>Access your patient records and manage medical data securely with role-based access control.</p>
+    </div>
+</div>
+
+<div class="stat-row">
+    <div class="stat-box2">
+        <div class="ic"><i class="fas fa-users"></i></div>
+        <div class="num">{{ patients|length }}</div>
+        <div class="lbl">Total Patients</div>
+    </div>
+    <div class="stat-box2">
+        <div class="ic"><i class="fas fa-calendar-check"></i></div>
+        {% set followup_count = patients | selectattr('status', 'equalto', 'Follow-up') | list | length %}
+        <div class="num">{{ followup_count }}</div>
+        <div class="lbl">Today's Appts</div>
+    </div>
+    <div class="stat-box2">
+        <div class="ic"><i class="fas fa-shield-alt"></i></div>
+        <div class="num">✓</div>
+        <div class="lbl">MFA Verified</div>
+    </div>
+    <div class="stat-box2">
+        <div class="ic"><i class="fas fa-lock"></i></div>
+        <div class="num">✓</div>
+        <div class="lbl">RBAC Active</div>
+    </div>
+</div>
+
+<div class="sec-title">Your Patients</div>
+
+{% for p in patients %}
+<div class="pat-card" style="animation-delay: {{ loop.index * 0.05 }}s;">
+    <div style="flex:1;">
+        <div class="pat-name"><i class="fas fa-user-circle" style="color:var(--success);"></i> &nbsp;{{ p.name }}</div>
+        <div class="pat-meta">
+            <p><strong>Condition:</strong> {{ p.condition }}</p>
+            <p><strong>Last Visit:</strong> {{ p.last_visit }} &nbsp;&nbsp; <strong>Next:</strong> {{ p.next_visit }}</p>
+            <p><strong>Risk:</strong> {{ p.risk }}</p>
+        </div>
+    </div>
+    <div class="pat-status {% if p.status == 'Critical' %}st-critical{% elif p.status == 'Follow-up' %}st-followup{% else %}st-stable{% endif %}">
+        <i class="fas fa-heartbeat"></i> {{ p.status }}
+    </div>
+</div>
+{% endfor %}
+
+<div class="hipaa-bar">
+    <i class="fas fa-shield-alt"></i> &nbsp;<strong>HIPAA Compliant:</strong> Patient data is protected by role-based access controls, encryption, and comprehensive security logging.
+</div>
+{% endblock %}

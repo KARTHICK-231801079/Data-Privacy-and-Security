@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard - Healthcare Security{% endblock %}
+{% block content %}
+<style>
+    .admin-hdr {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 2rem; border-bottom: 2px solid var(--primary); padding-bottom: 1rem;
+        animation: fadeUp 0.4s ease;
+    }
+    .admin-hdr h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; }
+    .admin-hdr .user-info { text-align: right; font-size: 0.88rem; color: var(--text-muted); }
+    .admin-hdr .user-info strong { color: var(--text); display: block; font-size: 1rem; margin-bottom: 0.4rem; }
+    .stats-row {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+        gap: 1rem; margin-bottom: 2rem;
+    }
+    .stat-card {
+        background: var(--white); border: 1.5px solid var(--border);
+        padding: 1.4rem 1rem; text-align: center;
+        box-shadow: 3px 3px 0 var(--border); transition: all 0.2s;
+        animation: fadeUp 0.5s ease both;
+    }
+    .stat-card:nth-child(1){animation-delay:.05s} .stat-card:nth-child(2){animation-delay:.1s}
+    .stat-card:nth-child(3){animation-delay:.15s} .stat-card:nth-child(4){animation-delay:.2s}
+    .stat-card:hover { box-shadow: 4px 4px 0 var(--accent); transform: translate(-1px,-1px); }
+    .stat-ic { font-size: 1.6rem; margin-bottom: 0.6rem; }
+    .stat-val { font-size: 2.2rem; font-weight: 800; line-height: 1; margin-bottom: 0.3rem; }
+    .stat-lbl { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); font-weight: 600; }
+    .sec-title {
+        font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+        color: var(--text); border-left: 4px solid var(--accent); padding-left: 0.75rem;
+        margin: 2rem 0 1rem; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .tbl-wrap { border: 1.5px solid var(--border); overflow: hidden; margin-bottom: 1rem; animation: fadeUp 0.5s ease; }
+    .badge-admin     { background: #e8f0ff; color: #0057ff; }
+    .badge-doctor    { background: #e8f7ee; color: #1a5c37; }
+    .badge-pharmacy  { background: #fff0e8; color: #7a3800; }
+    .badge-critical  { background: #fff0f0; color: #7a0011; }
+    .badge-warning   { background: #fff8e8; color: #7a4a00; }
+    .badge-info-c    { background: var(--accent-light); color: #00348a; }
+    .flagged-alert {
+        background: #fff0f0; border: 1.5px solid var(--danger);
+        border-left: 5px solid var(--danger); padding: 0.85rem 1rem;
+        font-size: 0.88rem; color: #7a0011; font-weight: 600; margin-top: 0.5rem;
+    }
+    .sys-info {
+        background: var(--white); border: 1.5px solid var(--border);
+        padding: 1.5rem; margin-top: 1rem; display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 1.5rem;
+        box-shadow: 3px 3px 0 var(--border);
+    }
+    .sys-row small { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 0.3rem; }
+    .sys-row span { font-weight: 700; font-size: 1rem; color: var(--text); }
+</style>
+
+<div class="admin-hdr">
+    <div>
+        <h1><i class="fas fa-cogs" style="color:var(--accent);"></i> &nbsp;Admin Dashboard</h1>
+        <p style="color:var(--text-muted); margin:0.3rem 0 0; font-size:0.9rem;">System Administrator Panel</p>
+    </div>
+    <div class="user-info">
+        <strong><i class="fas fa-user-circle"></i> {{ session.username }}</strong>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger" style="padding:0.45rem 1rem; font-size:0.83rem;">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-ic" style="color:var(--accent);"><i class="fas fa-users"></i></div>
+        <div class="stat-val" style="color:var(--accent);">{{ users|length }}</div>
+        <div class="stat-lbl">Total Users</div>
+    </div>
+    {% set failed_total = logs | selectattr('event_type','equalto','Failed Login') | list | length %}
+    <div class="stat-card">
+        <div class="stat-ic" style="color:{% if failed_total > 5 %}var(--danger){% else %}var(--success){% endif %};"><i class="fas fa-exclamation-circle"></i></div>
+        <div class="stat-val" style="color:{% if failed_total > 5 %}var(--danger){% else %}var(--success){% endif %};">{{ failed_total }}</div>
+        <div class="stat-lbl">Failed Logins</div>
+    </div>
+    {% set brute_total = logs | selectattr('event_type','equalto','Brute Force Alert') | list | length %}
+    <div class="stat-card">
+        <div class="stat-ic" style="color:{% if brute_total > 0 %}var(--danger){% else %}var(--success){% endif %};"><i class="fas fa-shield-alt"></i></div>
+        <div class="stat-val" style="color:{% if brute_total > 0 %}var(--danger){% else %}var(--success){% endif %};">{{ brute_total }}</div>
+        <div class="stat-lbl">Brute Force Alerts</div>
+    </div>
+    {% set critical_total = logs | selectattr('severity','equalto','critical') | list | length %}
+    <div class="stat-card">
+        <div class="stat-ic" style="color:{% if critical_total > 0 %}var(--danger){% else %}var(--success){% endif %};"><i class="fas fa-radiation-alt"></i></div>
+        <div class="stat-val" style="color:{% if critical_total > 0 %}var(--danger){% else %}var(--success){% endif %};">{{ critical_total }}</div>
+        <div class="stat-lbl">Critical Events</div>
+    </div>
+</div>
+
+<!-- Failed Login Monitoring -->
+<div class="sec-title"><i class="fas fa-user-shield"></i> Failed Login Monitoring</div>
+<div class="tbl-wrap">
+    <table class="table mb-0">
+        <thead>
+            <tr>
+                <th>Username</th><th>Failed Attempts</th><th>Risk Status</th><th>Last Attempt</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in failed_summary %}
+            <tr>
+                <td><strong>{{ row.username }}</strong></td>
+                <td>{{ row.attempts }}</td>
+                <td>
+                    <span class="badge {% if row.attempts >= critical_threshold %}badge-critical{% elif row.attempts >= 10 %}badge-warning{% else %}badge-info-c{% endif %}">
+                        {% if row.attempts >= critical_threshold %}FLAGGED{% elif row.attempts >= 10 %}WATCH{% else %}NORMAL{% endif %}
+                    </span>
+                </td>
+                <td style="color:var(--text-muted); font-size:0.87rem;">{{ row.last_attempt[:19] if row.last_attempt else 'N/A' }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:2rem;">No failed login attempts recorded</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% if flagged_users|length > 0 %}
+<div class="flagged-alert"><i class="fas fa-radiation-alt"></i> &nbsp;{{ flagged_users|length }} user(s) crossed the critical threshold (&ge; {{ critical_threshold }} failed attempts).</div>
+{% endif %}
+
+<!-- Users Table -->
+<div class="sec-title"><i class="fas fa-users"></i> Registered Users</div>
+<div class="tbl-wrap">
+    <table class="table mb-0">
+        <thead>
+            <tr><th>Username</th><th>Role</th><th>Created</th><th>Last Login</th></tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td><strong>{{ user.username }}</strong></td>
+                <td><span class="badge {% if user.role == 'Admin' %}badge-admin{% elif user.role == 'Doctor' %}badge-doctor{% else %}badge-pharmacy{% endif %}">{{ user.role }}</span></td>
+                <td style="color:var(--text-muted); font-size:0.87rem;">{{ user.created_at[:10] if user.created_at else 'N/A' }}</td>
+                <td style="color:var(--text-muted); font-size:0.87rem;">{{ user.last_login[:19] if user.last_login else 'Never' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Security Logs -->
+<div class="sec-title"><i class="fas fa-shield-alt"></i> Recent Security Events (Last 50)</div>
+<div class="tbl-wrap">
+    <table class="table mb-0">
+        <thead>
+            <tr><th style="width:18%">Time</th><th style="width:20%">Event</th><th style="width:15%">User</th><th>Message</th><th style="width:15%">Severity</th></tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td style="font-size:0.83rem; color:var(--text-muted); font-family:'DM Mono',monospace;">{{ log.event_time[11:19] if log.event_time else 'N/A' }}</td>
+                <td><strong style="font-size:0.88rem;">{{ log.event_type }}</strong></td>
+                <td style="font-size:0.88rem;">{{ log.username or 'System' }}</td>
+                <td style="font-size:0.85rem; color:var(--text-muted);">{{ log.message[:40] }}{{ '...' if log.message|length > 40 else '' }}</td>
+                <td><span class="badge {% if log.severity == 'critical' %}badge-critical{% elif log.severity == 'warning' %}badge-warning{% else %}badge-info-c{% endif %}">{{ log.severity|upper }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- System Info -->
+<div class="sec-title"><i class="fas fa-info-circle"></i> System Information</div>
+<div class="sys-info">
+    <div class="sys-row"><small>Database Status</small><span style="color:var(--success);"><i class="fas fa-database"></i> Connected</span></div>
+    <div class="sys-row"><small>Security Features</small><span style="color:var(--accent);"><i class="fas fa-shield-alt"></i> Active</span></div>
+    <div class="sys-row"><small>Total Events Logged</small><span><i class="fas fa-list"></i> {{ logs|length }}</span></div>
+</div>
+{% endblock %}

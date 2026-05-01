@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% block title %}Pharmacy Dashboard - Healthcare Security{% endblock %}
+{% block content %}
+<style>
+    .pharm-hdr {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 2rem; border-bottom: 2px solid var(--primary); padding-bottom: 1rem;
+        animation: fadeUp 0.4s ease;
+    }
+    .pharm-hdr h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; }
+    .pharm-hdr p { color: var(--text-muted); font-size: 0.9rem; margin: 0.2rem 0 0; }
+    .pharm-badge { background: #1e40af; color: white; padding: 0.5rem 1.2rem; font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 1px; }
+    .welcome-bar {
+        background: var(--primary); color: white; padding: 1.6rem 2rem;
+        margin-bottom: 2rem; display: flex; align-items: center; gap: 1.5rem;
+        animation: slideIn 0.5s ease;
+    }
+    .welcome-bar .wic { font-size: 2.3rem; opacity: 0.65; }
+    .welcome-bar h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.2rem; letter-spacing: -0.3px; }
+    .welcome-bar p { opacity: 0.75; font-size: 0.88rem; margin: 0; }
+    .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-box2 {
+        background: var(--white); border: 1.5px solid var(--border); padding: 1.3rem; text-align: center;
+        box-shadow: 3px 3px 0 var(--border); transition: all 0.2s; animation: fadeUp 0.5s ease both;
+    }
+    .stat-box2:nth-child(1){animation-delay:.05s}.stat-box2:nth-child(2){animation-delay:.1s}
+    .stat-box2:nth-child(3){animation-delay:.15s}.stat-box2:nth-child(4){animation-delay:.2s}
+    .stat-box2:hover { box-shadow: 4px 4px 0 #1e40af; transform: translate(-1px,-1px); }
+    .stat-box2 .ic { font-size: 1.5rem; color: #1e40af; margin-bottom: 0.5rem; }
+    .stat-box2 .num { font-size: 2rem; font-weight: 800; color: #1e40af; line-height: 1; margin-bottom: 0.25rem; }
+    .stat-box2 .lbl { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); font-weight: 600; }
+    .tab-bar { display: flex; gap: 0; margin-bottom: 1.5rem; border: 1.5px solid var(--border); }
+    .tab-btn { flex: 1; background: var(--bg); border: none; color: var(--text-muted); font-weight: 600; font-size: 0.85rem; padding: 0.75rem 1rem; cursor: pointer; transition: all 0.2s; border-right: 1.5px solid var(--border); text-transform: uppercase; letter-spacing: 0.5px; font-family: 'DM Sans', sans-serif; }
+    .tab-btn:last-child { border-right: none; }
+    .tab-btn:hover { background: var(--accent-light); color: var(--accent); }
+    .tab-btn.active { background: var(--primary); color: white; }
+    .sec-title { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text); border-left: 4px solid #1e40af; padding-left: 0.75rem; margin: 0 0 1rem; }
+    .rx-card {
+        background: var(--white); border: 1.5px solid var(--border); padding: 1.3rem 1.5rem;
+        margin-bottom: 0.8rem; box-shadow: 3px 3px 0 var(--border);
+        transition: all 0.2s; animation: fadeUp 0.4s ease;
+    }
+    .rx-card:hover { box-shadow: 4px 4px 0 #1e40af; transform: translate(-1px,-1px); }
+    .rx-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+    .rx-patient { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+    .rx-priority { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem; }
+    .rx-status { padding: 0.4rem 0.9rem; font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    .st-ready   { background: #e8f7ee; color: #1a5c37; border: 1.5px solid #2a9d5c; }
+    .st-pending { background: #fff8e8; color: #7a4a00; border: 1.5px solid var(--warning); }
+    .st-urgent  { background: #fff0f0; color: #7a0011; border: 1.5px solid var(--danger); }
+    .rx-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap: 0.75rem; }
+    .rx-detail { background: var(--bg); padding: 0.75rem; border: 1px solid var(--border); }
+    .rx-detail .dl { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 700; margin-bottom: 0.2rem; }
+    .rx-detail .dv { font-weight: 700; color: var(--text); font-size: 0.9rem; }
+    .dea-bar { background: var(--primary); color: white; padding: 1rem 1.5rem; font-size: 0.87rem; margin-top: 2rem; font-weight: 500; }
+    .dea-bar strong { color: #7dd3fc; }
+</style>
+
+<div class="pharm-hdr">
+    <div>
+        <h1><i class="fas fa-pills" style="color:#1e40af;"></i> &nbsp;Pharmacy Portal</h1>
+        <p>Prescription Management &amp; Inventory</p>
+    </div>
+    <div class="pharm-badge"><i class="fas fa-capsules"></i> &nbsp;{{ username }}</div>
+</div>
+
+<div class="welcome-bar">
+    <div class="wic"><i class="fas fa-hand-sparkles"></i></div>
+    <div>
+        <h2>Welcome, {{ username }}!</h2>
+        <p>Manage prescriptions and track medication inventory with secure role-based access.</p>
+    </div>
+</div>
+
+<div class="stat-row">
+    <div class="stat-box2">
+        <div class="ic"><i class="fas fa-prescription-bottle"></i></div>
+        <div class="num">{{ prescriptions|length }}</div>
+        <div class="lbl">Total Rx</div>
+    </div>
+    <div class="stat-box2">
+        <div class="ic"><i class="fas fa-check-circle"></i></div>
+        {% set ready_count = prescriptions | selectattr('status', 'equalto', 'Ready') | list | length %}
+        <div class="num">{{ ready_count }}</div>
+        <div class="lbl">Ready for Pickup</div>
+    </div>
+    <div class="stat-box2">
+        <div class="ic"><i class="fas fa-hourglass-half"></i></div>
+        {% set pending_count = prescriptions | selectattr('status', 'equalto', 'Pending') | list | length %}
+        <div class="num">{{ pending_count }}</div>
+        <div class="lbl">Pending</div>
+    </div>
+    <div class="stat-box2">
+        <div class="ic"><i class="fas fa-lock"></i></div>
+        <div class="num">✓</div>
+        <div class="lbl">Encrypted</div>
+    </div>
+</div>
+
+<div class="tab-bar">
+    <button class="tab-btn active" data-tab="ready"><i class="fas fa-check-circle"></i> Ready (8)</button>
+    <button class="tab-btn" data-tab="pending"><i class="fas fa-hourglass-half"></i> Pending (4)</button>
+    <button class="tab-btn" data-tab="all"><i class="fas fa-list"></i> All (12)</button>
+</div>
+
+<div id="ready-tab">
+    <div class="sec-title"><i class="fas fa-check-circle" style="color:var(--success);"></i> Ready for Pickup</div>
+    {% for rx in prescriptions if rx.status == 'Ready' %}
+    <div class="rx-card">
+        <div class="rx-top">
+            <div>
+                <div class="rx-patient"><i class="fas fa-user"></i> {{ rx.patient }}</div>
+                <div class="rx-priority">Priority: {{ rx.priority }}</div>
+            </div>
+            <span class="rx-status st-ready"><i class="fas fa-check-circle"></i> {{ rx.status }}</span>
+        </div>
+        <div class="rx-details">
+            <div class="rx-detail"><div class="dl">Medication</div><div class="dv">{{ rx.medication }}</div></div>
+            <div class="rx-detail"><div class="dl">Quantity</div><div class="dv">{{ rx.qty }}</div></div>
+            <div class="rx-detail"><div class="dl">Status</div><div class="dv">{{ rx.status }}</div></div>
+            <div class="rx-detail"><div class="dl">Priority</div><div class="dv">{{ rx.priority }}</div></div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div id="pending-tab" style="display:none;">
+    <div class="sec-title"><i class="fas fa-hourglass-half" style="color:var(--warning);"></i> Pending Processing</div>
+    {% for rx in prescriptions if rx.status != 'Ready' %}
+    <div class="rx-card">
+        <div class="rx-top">
+            <div>
+                <div class="rx-patient"><i class="fas fa-user"></i> {{ rx.patient }}</div>
+                <div class="rx-priority">Priority: {{ rx.priority }}</div>
+            </div>
+            <span class="rx-status {% if rx.status == 'Urgent' %}st-urgent{% else %}st-pending{% endif %}">
+                <i class="fas fa-hourglass-half"></i> {{ rx.status }}
+            </span>
+        </div>
+        <div class="rx-details">
+            <div class="rx-detail"><div class="dl">Medication</div><div class="dv">{{ rx.medication }}</div></div>
+            <div class="rx-detail"><div class="dl">Quantity</div><div class="dv">{{ rx.qty }}</div></div>
+            <div class="rx-detail"><div class="dl">Status</div><div class="dv">{{ rx.status }}</div></div>
+            <div class="rx-detail"><div class="dl">Priority</div><div class="dv">{{ rx.priority }}</div></div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div id="all-tab" style="display:none;">
+    <div class="sec-title"><i class="fas fa-list"></i> All Prescriptions</div>
+    {% for rx in prescriptions %}
+    <div class="rx-card">
+        <div class="rx-top">
+            <div>
+                <div class="rx-patient"><i class="fas fa-user"></i> {{ rx.patient }}</div>
+                <div class="rx-priority">Priority: {{ rx.priority }}</div>
+            </div>
+            <span class="rx-status {% if rx.status == 'Ready' %}st-ready{% elif rx.status == 'Urgent' %}st-urgent{% else %}st-pending{% endif %}">
+                {{ rx.status }}
+            </span>
+        </div>
+        <div class="rx-details">
+            <div class="rx-detail"><div class="dl">Medication</div><div class="dv">{{ rx.medication }}</div></div>
+            <div class="rx-detail"><div class="dl">Quantity</div><div class="dv">{{ rx.qty }}</div></div>
+            <div class="rx-detail"><div class="dl">Status</div><div class="dv">{{ rx.status }}</div></div>
+            <div class="rx-detail"><div class="dl">Priority</div><div class="dv">{{ rx.priority }}</div></div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="dea-bar">
+    <i class="fas fa-shield-alt"></i> &nbsp;<strong>DEA Compliant:</strong> All prescription data is secured with encryption, access controls, and comprehensive audit logging.
+</div>
+
+<script>
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('[id$="-tab"]').forEach(t => t.style.display = 'none');
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab + '-tab').style.display = 'block';
+    });
+});
+</script>
+{% endblock %}

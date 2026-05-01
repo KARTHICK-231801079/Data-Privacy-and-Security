@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}Register - Healthcare Security{% endblock %}
+{% block content %}
+<style>
+    .reg-wrap { max-width: 460px; margin: 3rem auto; animation: fadeUp 0.5s ease; }
+    .reg-hero { text-align: center; margin-bottom: 1.8rem; }
+    .reg-hero h1 { font-size: 1.8rem; font-weight: 700; color: var(--text); letter-spacing: -0.4px; }
+    .reg-hero p { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.3rem; }
+    .steps {
+        display: flex; gap: 0; margin-bottom: 2rem; border: 1.5px solid var(--border);
+    }
+    .step {
+        flex: 1; text-align: center; padding: 0.9rem 0.5rem;
+        border-right: 1.5px solid var(--border);
+        background: var(--bg); transition: background 0.3s;
+    }
+    .step:last-child { border-right: none; }
+    .step.active { background: var(--primary); }
+    .step-num {
+        display: inline-flex; width: 26px; height: 26px; align-items: center; justify-content: center;
+        border: 2px solid var(--border); font-weight: 700; font-size: 0.8rem; color: var(--text-muted);
+        margin-bottom: 0.4rem;
+    }
+    .step.active .step-num { border-color: white; color: white; }
+    .step-name { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+    .step.active .step-name { color: rgba(255,255,255,0.85); }
+    .form-group { margin-bottom: 1.3rem; }
+    .btn-full { width: 100%; padding: 0.8rem; font-size: 0.95rem; margin-top: 0.4rem; }
+    .warn-bar { background: #fff8e8; border-left: 4px solid var(--warning); padding: 0.7rem 1rem; margin-top: 1rem; font-size: 0.85rem; color: #7a4a00; font-weight: 500; }
+    .info-bar { background: var(--accent-light); border-left: 4px solid var(--accent); padding: 0.7rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: #00348a; font-weight: 500; }
+    .qr-box { text-align: center; background: var(--bg); border: 1.5px dashed var(--border); padding: 2rem 1rem; margin-bottom: 1.2rem; }
+    .qr-box img { max-width: 180px; }
+    .key-box { background: var(--primary); color: white; font-family: 'DM Mono', monospace; padding: 0.9rem 1rem; margin-bottom: 1.2rem; font-size: 0.9rem; word-break: break-all; letter-spacing: 1px; }
+    .key-box small { display: block; font-size: 0.72rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.4rem; font-family: 'DM Sans', sans-serif; }
+    .otp-input-big { text-align: center; font-size: 2rem; letter-spacing: 0.5em; font-family: 'DM Mono', monospace; font-weight: 600; }
+    .reg-foot { text-align: center; margin-top: 1.5rem; padding-top: 1.2rem; border-top: 1.5px solid var(--border); font-size: 0.88rem; color: var(--text-muted); }
+</style>
+
+<div class="reg-wrap">
+    <div class="reg-hero">
+        <h1>Create Account</h1>
+        <p>Healthcare Security Portal Registration</p>
+    </div>
+
+    <div class="steps">
+        <div class="step {% if not show_qr %}active{% endif %}">
+            <div class="step-num">1</div>
+            <div class="step-name">Account</div>
+        </div>
+        <div class="step {% if show_qr %}active{% endif %}">
+            <div class="step-num">2</div>
+            <div class="step-name">MFA Setup</div>
+        </div>
+    </div>
+
+    {% if not show_qr %}
+    <div class="card">
+        <div class="card-body">
+            <form method="post" action="{{ url_for('register') }}">
+                <div class="form-group">
+                    <label class="form-label" for="username"><i class="fas fa-user"></i> &nbsp;Username</label>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="At least 3 characters" required minlength="3">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="password"><i class="fas fa-lock"></i> &nbsp;Password</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="At least 8 characters" required minlength="8">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="role"><i class="fas fa-user-tag"></i> &nbsp;Role</label>
+                    <select class="form-select" id="role" name="role" required>
+                        <option value="">Select your role...</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Doctor">Doctor</option>
+                        <option value="Pharmacy">Pharmacy</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-arrow-right"></i> &nbsp; Continue to MFA Setup
+                </button>
+            </form>
+            <div class="warn-bar"><i class="fas fa-mobile-alt"></i> &nbsp;You'll need an authenticator app (Google Authenticator, Authy) in the next step.</div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="card">
+        <div class="card-body">
+            <div class="info-bar"><i class="fas fa-info-circle"></i> &nbsp;<strong>Step 1:</strong> Scan the QR code with your authenticator app</div>
+            <div class="qr-box">
+                <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;"><i class="fas fa-mobile-alt"></i> Google Authenticator / Authy / Microsoft Authenticator</p>
+                <img src="{{ qr_code_src }}" alt="QR Code for TOTP">
+            </div>
+            <div class="warn-bar" style="margin-bottom:1rem;"><i class="fas fa-key"></i> &nbsp;Can't scan? Enter this key manually:</div>
+            <div class="key-box"><small>Manual Setup Key</small>{{ totp_secret }}</div>
+            <div class="info-bar"><i class="fas fa-info-circle"></i> &nbsp;<strong>Step 2:</strong> Enter the 6-digit code from your app</div>
+            <form method="post" action="{{ url_for('verify_registration') }}">
+                <div class="form-group">
+                    <label class="form-label" for="otp"><i class="fas fa-barcode"></i> &nbsp;One-Time Password</label>
+                    <input type="text" class="form-control otp-input-big" id="otp" name="otp" placeholder="000000" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" required autofocus>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-check"></i> &nbsp; Verify &amp; Complete Setup
+                </button>
+            </form>
+            <div class="warn-bar" style="margin-top:1rem;"><i class="fas fa-exclamation-triangle"></i> &nbsp;Save your backup codes in a secure location.</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="reg-foot">
+        <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+    </div>
+</div>
+{% endblock %}
